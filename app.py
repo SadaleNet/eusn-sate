@@ -21,8 +21,8 @@ def compute_challenge_hash(session_id, image_id):
 @app.route('/', methods=['GET', 'POST'])
 def form():
 	error_message = {}
-	available_us={"ilonena": 3}
-	available={"ilonena": 1}
+	available_us={"ilonena": 3, "maninamako": 0}
+	available={"ilonena": 1, "maninamako": 1000000}
 
 	if request.method == 'POST':
 		if not (request.form.get('recipient') and request.form.get('line1') and request.form.get('city') and request.form.get('country') and request.form.get('warehouse')):

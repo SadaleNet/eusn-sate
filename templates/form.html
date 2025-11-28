@@ -60,9 +60,9 @@
 			} else if(warehouse == "ANTE") {
 				quantity_dom.max = available[key];
 			}
-			if(quantity_dom.max > 0 && quantity_dom.value == 0) {
+			if(parseInt(quantity_dom.max) > 0 && parseInt(quantity_dom.value) == 0) {
 				quantity_dom.value = 1;
-			} else if (quantity_dom.value > quantity_dom.max) {
+			} else if (parseInt(quantity_dom.value) > parseInt(quantity_dom.max)) {
 				quantity_dom.value = quantity_dom.max;
 			}
 		}
@@ -86,6 +86,15 @@
 	}
 	.description {
 		color: #777777;
+	}
+	.item-container {
+		display: flex;
+		flex-wrap: wrap;
+	}
+	.item-content {
+		padding: 5px;
+		margin: 5px;
+		border: 1px solid;
 	}
 </style>
 
@@ -164,26 +173,25 @@ Lipela IRC, Email)" rows="8" cols="32" required>{{ request.form.get("contact", "
 <h3>sina wile esun e seme?</h3>
 <span class="error-message">{{ error_message.get("items", "") }}</span>
 
-{% for key, item in listing.items() %}
+<div class="item-container">
+	{% for key, item in listing.items() %}
+		<div class="item-content">
+		<b>{{ item["title"] }}<br/>
+		(ma Mewika: US${{ item["price"] }} + US${{ item["shipping"]["US"] }} poki tawa)<br/>
+		(ma Mewika ala: US${{ item["price"] }} + US${{ item["shipping"]["ANTE"] }} poki tawa)<br/>
+		</b>
+		{% include key + ".html" %}
+		<br/>
+		<br/>
 
-<table border="5"><tr><td>
-<b>{{ item["title"] }}<br/>
-(ma Mewika: US${{ item["price"] }} + US${{ item["shipping"]["US"] }} poki tawa)<br/>
-(ma Mewika ala: US${{ item["price"] }} + US${{ item["shipping"]["ANTE"] }} poki tawa)<br/>
-</b>
-{% include key + ".html" %}
-<br/>
-<br/>
-
-<input type="checkbox" id="{{ key }}" hidden onchange="quantity_update_handler();" {{ "checked" if request.form.get(key, "0") != "0" else "" }}>
-<label for="{{ key }}">mi wile e ni:</label>
-<input type="number" name="{{ key }}" value="0" min="0" max="{{ available.get(key, 0)+available_us.get(key, 0) }}" required value="{{ request.form.get(key, 1) }}" onchange="quantity_update_handler();"/><br/>
-(jo: {{ available_us.get(key, 0) }} tawa ma Mewika taso)<br/>
-(jo: {{ available.get(key, 0) }} tawa ma ali tawa ma Mewika)
-
-</td></tr></table>
-
-{% endfor %}
+		<input type="checkbox" id="{{ key }}" hidden onchange="quantity_update_handler();" {{ "checked" if request.form.get(key, "0") != "0" else "" }}>
+		<label for="{{ key }}">mi wile e ni:</label>
+		<input type="number" name="{{ key }}" value="0" min="0" max="{{ available.get(key, 0)+available_us.get(key, 0) }}" required value="{{ request.form.get(key, 1) }}" onchange="quantity_update_handler();"/><br/>
+		(jo: {{ available_us.get(key, 0) }} tawa ma Mewika taso)<br/>
+		(jo: {{ available.get(key, 0) }} tawa ma ali tawa ma Mewika)
+		</div>
+	{% endfor %}
+</div>
 
 <span style="font-weight: bold; font-size: 150%; color: #003366">^ mani ni li US$<span id="mani_ali">{o lukin kepeken ilo Javascript!}</span></span>
 

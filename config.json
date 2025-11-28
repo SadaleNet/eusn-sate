@@ -4,6 +4,11 @@
 			"title": "ilo nena",
 			"price": 25,
 			"shipping": {"ANTE": 7, "US": 15}
+		},
+		"maninamako": {
+			"title": "mani namako",
+			"price": 1,
+			"shipping": {"ANTE": 0, "US": 0}
 		}
 	}
 }
