@@ -1,0 +1,244 @@
+{% extends "layout.html" %}
+{% block title %}o esun e ijo!{% endblock %}
+{% block content %}
+
+<script>
+	function $(x) {
+		return document.querySelector(x);
+	}
+
+	const available = {{ available | safe }};
+	const available_us = {{ available_us | safe }};
+	const items = {{ listing | safe }};
+	function get_warehouse() {
+		warehouse = null;
+		if($("#warehouse_US").checked) {
+			warehouse = "US";
+		} else if($("#warehouse_ANTE").checked) {
+			warehouse = "ANTE";
+		}
+		return warehouse;
+	}
+	function price_update_handler() {
+		warehouse = get_warehouse();
+		total = 0;
+		if(warehouse) {
+			for (let key in items) {
+				if(!$(`input[name='${key}']`).disabled) {
+					total += (items[key]["price"] + items[key]["shipping"][warehouse]) * $(`input[name='${key}']`).value;
+				}
+			}
+		}
+		if($("#mani_ali")) {
+			$("#mani_ali").innerHTML = warehouse ? total : "{o anu e ma sina!}"
+		}
+		return total
+	}
+	function quantity_update_handler() {
+		for (let key in items) {
+			$(`input[name='${key}']`).disabled = !$(`#${key}`).checked;
+		}
+		price_update_handler();
+	}
+	function warehouse_update_handler() {
+		warehouse = get_warehouse();
+		if(warehouse == "US") {
+			$("input[name='country'][type='text']").disabled = true;
+			$("input[name='country'][type='text']").placeholder = "USA";
+			$("input[name='country'][type='text']").value = "";
+			$("input[name='country'][type='hidden']").disabled = false;
+		} else if(warehouse == "ANTE") {
+			$("input[name='country'][type='text']").disabled = false;
+			$("input[name='country'][type='text']").placeholder = "Philippines";
+			$("input[name='country'][type='hidden']").disabled = true;
+		}
+		
+		for (let key in items) {
+			const quantity_dom = $(`input[name='${key}']`);
+			if(warehouse == "US" || !warehouse) {
+				quantity_dom.max = available_us[key] + available[key];
+			} else if(warehouse == "ANTE") {
+				quantity_dom.max = available[key];
+			}
+			if(quantity_dom.max > 0 && quantity_dom.value == 0) {
+				quantity_dom.value = 1;
+			} else if (quantity_dom.value > quantity_dom.max) {
+				quantity_dom.value = quantity_dom.max;
+			}
+		}
+		price_update_handler();
+	}
+	function validate_form(event) {
+		if(price_update_handler() == 0) {
+			window.alert("o esun e ijo!")
+			event.preventDefault();
+		}
+	}
+</script>
+<style>
+	.error-message {
+		color: #ff0000;
+		font-weight: bold;
+	}
+	.error-message-top {
+		color: #ff0000;
+		font-weight: bold;
+	}
+	.description {
+		color: #777777;
+	}
+</style>
+
+<form action="/" onsubmit="return validate_form(event);" method="POST">
+
+<span class="error-message-top">{{ "ijo li pakala a! o lukin lon anpa!" if error_message else "" }}</span>
+
+<h3>lipu ni li seme?</h3>
+
+ni li esun Sate. kepeken lipu ni la sina ken esun e ijo tan <a href="https://sadale.net/tok" target="_blank">jan Sate</a>! :)<br/>
+sina jo e mani la o esun e ijo!<br/>
+sina jo ala e mani la o awen. mi jo e mani namako la ken la sina ken kama jo e ijo kepeken mani ala. o lukin e ilo Wesi e ilo Telekan.<br/>
+nanpa mani pi esun Sate li lon ma ni (kepeken toki Inli): <a href="https://github.com/SadaleNet/accounting-inventory-esunsate" target="_blank">mani pi esun Sate</a><br/>
+
+<h3>sina lon ma seme?</h3>
+<span class="error-message">{{ error_message.get("address", "") }}</span>
+<p>
+	<style>
+		#warehouse_us_content {
+			display:none;
+		}
+		
+		#warehouse_ante_content {
+			display:none;
+		}
+
+		#warehouse_US:checked ~ #warehouse_us_content {
+		  display: block;
+		}
+
+		#warehouse_ANTE:checked ~ #warehouse_ante_content {
+		  display: block;
+		}
+	</style>
+	<input type="text" name="recipient" size="35" maxlength="48" placeholder="Samuel H. Magtanggol" required autocomplete="off" value="{{ request.form.get('recipient', '') }}">* (nimi sina)<br/>
+	<input type="text" name="phone" size="35" maxlength="35" placeholder="+639399381669" autocomplete="off" value="{{ request.form.get('phone', '') }}" pattern="[+]?[0-9]+"> (nanpa pi ilo toki)<br/>
+	<input type="text" name="email" size="35" maxlength="35" placeholder="samuel.h.example@gmail.com" value="{{ request.form.get('email', '') }}"> (nimi pi ilo Email)<br/>
+	<input type="text" name="line1" size="35" maxlength="35" placeholder="95 Hermogenes Street" required autocomplete="off" value="{{ request.form.get('line1', '') }}">* (linja ma wan)<br/>
+	<input type="text" name="line2" size="35" maxlength="35" placeholder="Sofia Subdivision" autocomplete="off" value="{{ request.form.get('line2', '') }}"> (linja ma tu)<br/>
+	<input type="text" name="line3" size="35" maxlength="35" placeholder="Del Pilar" autocomplete="off" value="{{ request.form.get('line3', '') }}"> (linja ma tu wan)<br/>
+	<input type="text" name="line4" size="35" maxlength="35" placeholder="" autocomplete="off" value="{{ request.form.get('line4', '') }}"> (linja ma tu tu)<br/>
+	<input type="text" name="city" size="35" maxlength="35" placeholder="San Fernando City, Pampanga" required autocomplete="off" value="{{ request.form.get('city', '') }}">* (ma tomo)<br/>
+	<input type="text" name="zip" size="35" maxlength="35" placeholder="2000" autocomplete="off" value="{{ request.form.get('zip', '') }}"> (nanpa ZIP)<br/>
+	<span>
+		<input type="radio" id="warehouse_US" name="warehouse" value="US" required {{ "checked" if request.form.get("warehouse") == "US" else "" }} onchange="warehouse_update_handler()">
+		<label for="warehouse_US">🇺🇸ma Mewika</label>
+		<input type="radio" id="warehouse_ANTE" name="warehouse" value="ANTE" required {{ "checked" if request.form.get("warehouse") == "ANTE" else "" }} onchange="warehouse_update_handler()">
+		<label for="warehouse_ANTE">🌍ma Mewika ala: </label>
+		<br/>
+		<input type="text" name="country" size="35" maxlength="48" placeholder="Philippines" required autocomplete="off" value="{{ request.form.get('country', '') }}" {{ "disabled" if request.form.get("warehouse") == "US" else "" }}>* (ma)<br/>
+		<input type="hidden" name="country" value="USA" {{ "disabled" if not request.form.get("warehouse") == "US" else "" }}>
+
+		<span id="warehouse_ante_content" class="description">
+			mi wile kepeken kulupu <a href="https://www.hongkongpost.hk" target="_blank">HongKongPost</a>. ni li mani lili li tenpo lili. <br/>
+			poki ijo li open tawa tomo sina la sina o awen e tenpo mun wan. <br/><br/>
+		</span>
+		<span id="warehouse_us_content" class="description">
+			tenpo nanpa wan la mi pana e ijo tawa jan pona Mewika mi kepeken kulupu <a href="https://lhkexpress.com/" target="_blank">LHK Express</a>.<br/>
+			tenpo nanpa tu la jan pona Mewika mi li pana e ijo tawa sina kepeken kulupu USPS.<br/>
+			poki ijo li open tawa jan pona Mewika mi la sina o awen e tenpo mun tu. <br/><br/>
+		</span>
+	</span>
+
+	o kepeken toki Inli lon sewi a!<br/>
+	sina wile la sina ken pana e nanpa sina e nimi Email sina. ijo li pakala la jan pi tawa poki li ken toki tawa sina.<br/>
+</p>
+
+<h3>ijo li pakala la mi ken toki tawa sina kepeken nasin seme?</h3>
+<span class="error-message">{{ error_message.get("contact", "") }}</span>
+	<textarea name="contact" autocomplete="off" placeholder="ilo Email: foobar@example.com
+ilo Telekan: @foobar
+(ilo ni li ken: ilo Siko, Telekan,
+Whatsapp, waso laso, Pepu,
+Lipela IRC, Email)" rows="8" cols="32" required>{{ request.form.get("contact", "") }}</textarea><br/>
+
+<h3>sina wile esun e seme?</h3>
+<span class="error-message">{{ error_message.get("items", "") }}</span>
+
+{% for key, item in listing.items() %}
+
+<table border="5"><tr><td>
+<b>{{ item["title"] }}<br/>
+(ma Mewika: US${{ item["price"] }} + US${{ item["shipping"]["US"] }} poki tawa)<br/>
+(ma Mewika ala: US${{ item["price"] }} + US${{ item["shipping"]["ANTE"] }} poki tawa)<br/>
+</b>
+{% include key + ".html" %}
+<br/>
+<br/>
+
+<input type="checkbox" id="{{ key }}" hidden onchange="quantity_update_handler();" {{ "checked" if request.form.get(key, "0") != "0" else "" }}>
+<label for="{{ key }}">mi wile e ni:</label>
+<input type="number" name="{{ key }}" value="0" min="0" max="{{ available.get(key, 0)+available_us.get(key, 0) }}" required value="{{ request.form.get(key, 1) }}" onchange="quantity_update_handler();"/><br/>
+(jo: {{ available_us.get(key, 0) }} tawa ma Mewika taso)<br/>
+(jo: {{ available.get(key, 0) }} tawa ma ali tawa ma Mewika)
+
+</td></tr></table>
+
+{% endfor %}
+
+<span style="font-weight: bold; font-size: 150%; color: #003366">^ mani ni li US$<span id="mani_ali">{o lukin kepeken ilo Javascript!}</span></span>
+
+<h3>sina jan pona anu ilo ike?</h3>
+<span class="error-message">{{ error_message.get("captcha", "") }}</span>
+
+<h4>1. jan seme li mama pi toki pona?</h4>
+<p>- jan <input type="text" name="mama" size="5" maxlength="5" required placeholder="Nimi" autocomplete="off" /></p>
+<h4>2. sitelen ni li seme?</h4>
+<input type="hidden" name="session_id" value="{{ session_id }}" />
+<input type="hidden" name="challenge" value="{{ challenge }}" />
+<img src="/sitelen/{{ session_id }}/{{ challenge }}" width="240" height="240"/><br/>
+- <select name="sitelen" required>
+	<option value="" selected disabled hidden>(o anu!)</option>
+	<option value="kala">kala</option>
+	<option value="kasi">kasi</option>
+	<option value="kili">kili</option>
+	<option value="kiwen">kiwen</option>
+	<option value="len">len</option>
+	<option value="lipu">lipu</option>
+	<option value="luka">luka</option>
+	<option value="mani">mani</option>
+	<option value="mun">mun</option>
+	<option value="noka">noka</option>
+	<option value="pan">pan</option>
+	<option value="pipi">pipi</option>
+	<option value="poki">poki</option>
+	<option value="soweli">soweli</option>
+	<option value="tomo">tomo</option>
+	<option value="waso">waso</option>
+</select>
+
+<h3>pini! o pilin e nena ni:</h3>
+
+o sona e ni: sina ken pana e mani kepeken ilo Paypal taso. <br/>
+sina pilin e nena ni la o pana e mani lon tenpo "1hr". <br/>
+
+<input type="submit" value="mi o pana e mani kepeken ilo Paypal!" />
+</form>
+<hr/>
+
+To spammers: You've came to the wrong place. The submitted content of this form would never be shown to the public and won't be crawled by search engines. You're wasting my time and your own time. Please just leave and spam elsewhere more profitable to you.
+
+<script>
+	for (let key in items) {
+		$(`#${key}`).hidden = false;
+	}
+	quantity_update_handler();
+	warehouse_update_handler();
+	for(const em of document.querySelectorAll("span[class='error-message']")) {
+		if(em.innerHTML) {
+			em.scrollIntoView();
+			break;
+		}
+	}
+</script>
+
+{% endblock %}

@@ -1,0 +1,9 @@
+{
+	"LISTING": {
+		"ilonena": {
+			"title": "ilo nena",
+			"price": 25,
+			"shipping": {"ANTE": 7, "US": 15}
+		}
+	}
+}

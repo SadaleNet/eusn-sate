@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+	<head>
+		<!-- 🖕 -->
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			body {
+				background: repeating-conic-gradient(from 0deg at 50% 150%, #ffffff 5%, #ffee99 10%, #ffffff 15%);
+				background-attachment: fixed;
+				margin: 40px auto;
+				max-width: 90%;
+				font-family: sans-serif;
+			}
+
+			table, th, td {
+				border: 1px solid;
+			}
+			
+			th, td {
+				padding: 10px;
+			}
+
+			pre {
+				white-space: pre-wrap;
+			}
+
+			@media screen and (min-width: 50rem) {
+				body {
+					max-width: 70%;
+				}
+			}
+			@media screen and (min-width: 100rem) {
+				body {
+					max-width: 60%;
+				}
+			}
+			@media screen and (min-width: 25rem) {
+				.wrapper { display: flex; }
+				.flex1 {
+					display: flex;
+					flex: 1;
+				} }
+			}
+			.wrapper-wvcenter {
+				display: inline-flex;
+				align-items: center;
+			}
+			.div-limit-height { height: 100%; }
+			.nomargin { margin: 0px; }
+
+			a { color: #554f33; }
+			a:focus, a:hover, a:active { color: #7f774c; }
+			.site-title-link {
+				text-decoration-line: none;
+				font-weight: bold;
+			}
+			.copyright-text {
+				color: #666666;
+				font-size: 75%;
+			}
+		</style>
+		<title>{% block title %}{% endblock %} - esun Sate</title>
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="div-limit-height"><span class="wrapper-wvcenter"><a href="/" class="site-title-link"><span><img src="/favicon.ico" height="20"/></span> <span>esun Sate</span></a></span></div>
+		</div>
+		<p>{% block content %}{% endblock %}</p>
+		<p class="copyright-text">esun Sate li pali pi <a href="https://sadale.net/tok" target="_blank">jan Sate</a>.</p>
+	</body>
+</html>
