@@ -42,7 +42,8 @@ for(const em of document.querySelectorAll("input[class='inventory-adjuster']")) 
 		{% if order['status'] == status %}
 			<form action="/lawa/ante-e-esun" method="POST">
 			<li>
-				<a href="/lukin/{{order['session_id']}}" target="_blank">{{ order["session_id"] }}</a>
+				{{ order["datetime_str"] }}
+				<a href="{{visitor_url}}/lukin/{{order['session_id']}}" target="_blank">{{ order["session_id"][:8] }}</a>
 				{{ '🇺🇸' if order['warehouse'] == 'US' else '🌍' }}
 				<textarea rows="1" cols="15" readonly>{{ order['ip'] }}</textarea>
 				<textarea name="ref" cols="15" rows="1" placeholder="REF">{{ order['ref'] if order['ref'] }}</textarea>

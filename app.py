@@ -341,15 +341,20 @@ def admin():
 	con = connect_database()
 	cur = con.cursor()
 	compute_stale_and_expiry(cur)
-	cur.execute("SELECT session_id, warehouse, expired, ip, ref, message, (SELECT status FROM status_change WHERE order_id = orders.rowid ORDER BY datetime DESC LIMIT 1) as current_status FROM orders")
+	cur.execute("""SELECT session_id, warehouse, expired, ip, ref, message,
+		(SELECT status FROM status_change WHERE order_id = orders.rowid ORDER BY datetime DESC LIMIT 1) as current_status,
+		(SELECT datetime FROM status_change WHERE order_id = orders.rowid ORDER BY datetime LIMIT 1) as creation_datetime
+		FROM orders ORDER BY creation_datetime""")
 
 	orders = []
 	for i in cur.fetchall():
-		orders.append({"session_id": i[0], "warehouse": i[1], "expired": i[2], "ip": i[3], "ref": i[4], "message": i[5], "status": i[6]})
+		orders.append({"session_id": i[0], "warehouse": i[1], "expired": i[2], "ip": i[3], "ref": i[4], "message": i[5], "status": i[6],
+			"datetime": i[7], "datetime_str": get_utc_timestr_from_timestamp(i[7])})
 	
-	return render_template('admin.html', listing=app.config["LISTING"], stock=get_available_stock(), orders=orders,
+	return render_template('admin.html', listing=app.config["LISTING"],  visitor_url=app.config["VISITOR_URL"], stock=get_available_stock(), orders=orders,
 		status_map=STATUS_MAP,
-		status_title={i:f"{STATUS_MAP[i]}: {STATUS_DESCRIPTION_MAP[i]}" for i in STATUS_MAP})
+		status_title={i:f"{STATUS_MAP[i]}: {STATUS_DESCRIPTION_MAP[i]}" for i in STATUS_MAP},
+		)
 
 
 @app.route('/ante-nanpa-ijo', methods=['POST'])
