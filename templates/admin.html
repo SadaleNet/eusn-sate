@@ -44,8 +44,8 @@ for(const em of document.querySelectorAll("input[class='inventory-adjuster']")) 
 			<li>
 				<a href="/lukin/{{order['session_id']}}" target="_blank">{{ order["session_id"] }}</a>
 				{{ '🇺🇸' if order['warehouse'] == 'US' else '🌍' }}
-				<textarea rows="1" readonly>{{ order['ip'] }}</textarea>
-				<textarea name="ref" rows="1" placeholder="REF">{{ order['ref'] if order['ref'] }}</textarea>
+				<textarea rows="1" cols="15" readonly>{{ order['ip'] }}</textarea>
+				<textarea name="ref" cols="15" rows="1" placeholder="REF">{{ order['ref'] if order['ref'] }}</textarea>
 				<textarea name="message" rows="1" placeholder="toki">{{ order['message'] if order['message'] }}</textarea>
 				<select name="status" required>
 					{% for i in [-1, 0, 1, 2, 3, 4, 5, 6] %}

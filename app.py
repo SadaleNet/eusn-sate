@@ -439,7 +439,10 @@ def notification_api():
 	cur.execute("SELECT (SELECT rowid FROM status_change WHERE order_id = orders.rowid ORDER BY datetime DESC LIMIT 1) as entry_status_rowid FROM orders WHERE (SELECT status FROM status_change WHERE rowid = entry_status_rowid) = 1")
 	
 	status = cur.fetchall()
-	result = {"mute": len(status), "toki": f"esun Sate: jan {len(status)} li pana e mani. o lukin a!"}
+	if len(status) > 0:
+		result = {"mute": len(status), "toki": f"jan {len(status)} li pana e mani. o lukin a!"}
+	else:
+		result = {"mute": 0, "toki": f"jan ala li pana e mani"}
 	return Response(json.dumps(result), mimetype='application/json')
 
 
