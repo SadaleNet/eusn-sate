@@ -237,7 +237,7 @@ def form():
 						address_city, address_zip, address_country
 					) VALUES (?,?,?,?,?,  ?,?,?,  ?,?,?,?,  ?,?,?)
 					""",
-					(request.form.get("session_id", ""), False, request.form.get("warehouse", ""), request.remote_addr, request.form.get('contact'),
+					(request.form.get("session_id", ""), False, request.form.get("warehouse", ""), request.headers.get('X-Real-IP', request.remote_addr), request.form.get('contact'),
 					request.form.get("recipient", ""), request.form.get("phone", ""), request.form.get("email", ""), 
 					request.form.get("line1", ""), request.form.get("line2", ""), request.form.get("line3", ""), request.form.get("line4", ""),
 					request.form.get("city", ""), request.form.get("zip", ""), request.form.get("country", ""),)
