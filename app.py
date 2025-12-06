@@ -187,14 +187,22 @@ def check_auth():
 
 @app.route('/', methods=['GET', 'POST'])
 def form():
-	# Known issue: possible race condition. There's no lock and the inventory may go negative if two users submitting a request at the same time.
+	post_action = (request.method == 'POST' and not request.form.get('skip-validation'))
+	if post_action:
+		con = connect_database()
+		cur = con.cursor()
+		# Use IMMEDIATE TRANSACTION to hold the database lock before obtaining the stock's quantity.
+		# This is to make sure whatever stock we've read would still be available by the time we consume it,
+		# which is performed by inserting into the inventory_checkout table
+		cur.execute("BEGIN IMMEDIATE TRANSACTION")
+
 	stock = get_available_stock()
 	available = stock["available_ante"]
 	available_us = stock["available_us"]
 
 	error_message = {}
 
-	if request.method == 'POST' and not request.form.get('skip-validation'):
+	if post_action:
 		if not (request.form.get('recipient') and request.form.get('line1') and request.form.get('city') and request.form.get('country') and request.form.get('warehouse')):
 			error_message["address"] = "nimi \"*\" li lon la pana e ona!"
 
@@ -220,16 +228,13 @@ def form():
 			error_message["captcha"] = "sina toki e ijo ike! o toki pona!"
 
 		if not error_message:
-			con = connect_database()
-			cur = con.cursor()
 
 			cur.execute("SELECT COUNT(*) FROM orders WHERE session_id = ?", (request.form.get("session_id", ""),))
 			if cur.fetchone()[0] == 0:
 				# Only perform insertation if session_id hasn't been recorded yet
-				# Known issue: possible race condition. There's no mutex and this BEGIN TRANSACTION block might happen twice concurrently,
-				# which would cause one of them fail to commit/run.
+				# Known issue: If the same form got sent twice at the same time, one of them would fail
+				# due to duplicate session_id
 				timenow = round(time.time())
-				cur.execute("BEGIN TRANSACTION;")
 				cur.execute("""
 					INSERT INTO orders(
 						session_id, expired, warehouse, ip, contact,
@@ -269,7 +274,7 @@ def form():
 				if cur.rowcount == 0:
 					abort(500)
 
-				cur.execute("COMMIT TRANSACTION;")
+				cur.execute("COMMIT TRANSACTION")
 
 			# all good! Redirect to /lukin/<token>!
 			session_id = request.form.get("session_id", "")
@@ -415,7 +420,7 @@ def update_order():
 	if not (request.form.get("session_id") and ("ref" in request.form) and ("expired" in request.form) and ("message" in request.form) and ("status" in request.form)):
 		abort(500)
 
-	cur.execute("BEGIN TRANSACTION;")
+	cur.execute("BEGIN TRANSACTION")
 	cur.execute("UPDATE orders SET ref=?,expired=?,message=? WHERE session_id = ?",
 		(request.form["ref"] if request.form["ref"] else None,
 		request.form["expired"],
@@ -434,7 +439,7 @@ def update_order():
 						(order_id, timenow-1, 2,))
 		cur.execute("INSERT INTO status_change(order_id, datetime, status) VALUES (?,?,?)",
 					(order_id, timenow, new_status,))
-	cur.execute("COMMIT TRANSACTION;")
+	cur.execute("COMMIT TRANSACTION")
 
 	return redirect(f"/lawa", code=302)
 
