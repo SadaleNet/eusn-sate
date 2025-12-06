@@ -187,6 +187,7 @@ def check_auth():
 
 @app.route('/', methods=['GET', 'POST'])
 def form():
+	# Known issue: possible race condition. There's no lock and the inventory may go negative if two users submitting a request at the same time.
 	stock = get_available_stock()
 	available = stock["available_ante"]
 	available_us = stock["available_us"]

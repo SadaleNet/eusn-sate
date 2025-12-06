@@ -112,7 +112,7 @@ sina jo ala e mani la o awen. mi jo e mani namako la ken la sina ken kama jo e i
 nanpa mani pi esun Sate li lon ma ni (kepeken toki Inli): <a href="https://github.com/SadaleNet/accounting-inventory-esunsate" target="_blank">mani pi esun Sate</a><br/>
 
 <h3>sina lon ma seme?</h3>
-<span class="error-message">{{ error_message.get("address", "") }}</span>
+<span class="error-message">{{ error_message.get("address", "") }}{{ "<br/>"|safe if error_message.get("address") }}</span>
 nimi "*" li lon la o pana e ona! nimi "*" li lon ala la sina ken pana ala e ona.<br/>
 o kepeken toki Inli lon ma ni!<br/>
 sina wile la sina ken pana e nanpa pi ilo toki sina e nimi Email sina. ijo li pakala la jan pi tawa poki li ken toki tawa sina.<br/>
@@ -165,7 +165,7 @@ sina wile la sina ken pana e nanpa pi ilo toki sina e nimi Email sina. ijo li pa
 </p>
 
 <h3>ijo li pakala la mi (jan Sate) ken toki tawa sina kepeken nasin seme?</h3>
-<span class="error-message">{{ error_message.get("contact", "") }}</span>
+<span class="error-message">{{ error_message.get("contact", "") }}{{ "<br/>"|safe if error_message.get("contact") }}</span>
 	<textarea name="contact" autocomplete="off" placeholder="ilo Email: foobar@example.com
 ilo Telekan: @foobar
 (ilo ni li ken: ilo Siko, Telekan,
@@ -173,7 +173,7 @@ Whatsapp, waso laso, Pepu,
 Lipela IRC, Email)" rows="8" cols="32" required>{{ request.form.get("contact", "") }}</textarea><br/>
 
 <h3>sina wile esun e seme?</h3>
-<span class="error-message">{{ error_message.get("items", "") }}</span>
+<span class="error-message">{{ error_message.get("items", "") }}{{ "<br/>"|safe if error_message.get("items") }}</span>
 
 <div class="item-container">
 	{% for key, item in listing.items() %}

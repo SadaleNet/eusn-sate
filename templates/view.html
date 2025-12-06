@@ -39,14 +39,14 @@
 	{% for s in status %}
 		<tr><th valign="top" align="right">{{s["datetime_str"]}}:</th><td valign="top">{{s["description"]}}</td></tr>
 	{% endfor %}
-	</table>
 	{% if entry["message"] is not none %}
-		<b>sona namako:</b> {{ entry["message"] }} <br/>
+		<tr><th valign="top" align="right">sona namako:</th><td valign="top">{{ entry["message"] }}</td></tr>
 	{% endif %}
+	</table>
 </td></tr>
 </table>
 
-{% if status[-1]|length == 0 %}
+{% if status|length == 0 %}
 	<h3>PAKALA A! O TOKI TAWA JAN SATE!</h3>
 
 {% elif status[-1]["status"] == -1 %}
