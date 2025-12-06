@@ -261,7 +261,7 @@ def form():
 				shipping = 0.0
 				for k,v in app.config["LISTING"].items():
 					if request.form.get(k, "").isnumeric():
-						quantity_of_item = int(request.form.get(k, "").isnumeric())
+						quantity_of_item = int(request.form.get(k, ""))
 						cur.execute("INSERT INTO inventory_checkout(order_id, item, quantity, price_each) VALUES (?,?,?,?)",
 							(order_id, k, quantity_of_item, v["price"],)
 						)
