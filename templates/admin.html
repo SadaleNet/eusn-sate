@@ -38,7 +38,7 @@ for(const em of document.querySelectorAll("input[class='inventory-adjuster']")) 
 {% for status in [1, 2, 3, 4, 5, 0, 6, -1] %}
 	<h3>{{status}}: {{status_title[status]}}</h3>
 	<ul>
-	{% for order in orders %}
+	{% for order in orders[::-1] %}
 		{% if order['status'] == status %}
 			<form action="/lawa/ante-e-esun" method="POST">
 			<li>
