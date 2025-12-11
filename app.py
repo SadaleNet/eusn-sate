@@ -76,9 +76,9 @@ CREATE TABLE IF NOT EXISTS inventory_checkout (
 """)
 	cur.execute("""
 CREATE TABLE IF NOT EXISTS inventory_list (
-	item TEXT UNIQUE NOT NULL,
-	quantity_ante INTEGER NOT NULL,
-	quantity_us INTEGER NOT NULL
+	item TEXT NOT NULL,
+	warehouse TEXT NOT NULL,
+	quantity INTEGER NOT NULL
 	);
 """)
 	return con
@@ -135,12 +135,10 @@ def get_available_stock():
 
 	# Compute the consumed stock here
 	cur = con.cursor()
-	cur.execute("SELECT item, quantity_ante, quantity_us FROM inventory_list")
+	cur.execute("SELECT item, warehouse, quantity FROM inventory_list")
 	for i in cur.fetchall():
-		total["ANTE"][i[0]] = i[1]
-		total["US"][i[0]] = i[2]
-		available["ANTE"][i[0]] = i[1]
-		available["US"][i[0]] = i[2]
+		total[i[1]][i[0]] = i[2]
+		available[i[1]][i[0]] = i[2]
 
 	# Compute the consumed stock here
 	cur.execute("""
@@ -372,10 +370,11 @@ def update_inventory():
 	con = connect_database()
 	cur = con.cursor()
 	for key in app.config["LISTING"]:
-		update_content = (request.form.get(f"{key}_US"), request.form.get(f"{key}_ANTE"), key)
-		cur.execute("UPDATE inventory_list SET quantity_us = ?, quantity_ante = ? WHERE item = ?", update_content)
-		if cur.rowcount == 0:
-			cur.execute("INSERT INTO inventory_list (quantity_us, quantity_ante, item) VALUES (?,?,?)", update_content)
+		for warehouse in ["US", "ANTE"]:
+			update_content = (request.form.get(f"{key}_{warehouse}"), key, warehouse)
+			cur.execute("UPDATE inventory_list SET quantity = ? WHERE item = ? AND warehouse = ?", update_content)
+			if cur.rowcount == 0:
+				cur.execute("INSERT INTO inventory_list (quantity, item, warehouse) VALUES (?,?,?)", update_content)
 	con.commit()
 	return redirect("/lawa", code=302)
 
